@@ -25,12 +25,18 @@ space_map SPACE;
 #ifdef MAKE_ODD
 #define ID(odd,even) odd
 #define NUM_ARGS 1
+#define MOD2 1
+#define ODD_OR_EVEN_NAME "odd"
 #elif defined MAKE_EVEN
 #define ID(odd,even) even
 #define NUM_ARGS 1
+#define MOD2 0
+#define ODD_OR_EVEN_NAME "even"
 #else
 #define ID(odd,even) (ODD_OR_EVEN == ODD ? odd : even)
 #define NUM_ARGS 2
+#define MOD2 (ODD_OR_EVEN == ODD ? 1 : 0)
+#define ODD_OR_EVEN_NAME (ODD_OR_EVEN == ODD ? "odd" : "even")
 #endif
 
 int open_spaces(const list< string > &spacenames)
@@ -38,7 +44,8 @@ int open_spaces(const list< string > &spacenames)
 	list< string >::const_iterator it = spacenames.begin();
 	for (; it != spacenames.end(); ++it) {
 		fstream *f = new fstream();
-		string filename = "id/"+ *it +".odd";
+		string filename = "id/"+ *it +".";
+		filename += ODD_OR_EVEN_NAME;
 		f->open(filename.c_str());
 		int id = 0;
 		*f >> id;
