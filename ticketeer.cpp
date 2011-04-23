@@ -110,7 +110,6 @@ int server_iteration(int sock)
 		sprintf(output, "%d\n", it->second.first);
 		write(f, output, strlen(output));
 	}
-	printf("ticket space: %s -> %d\n", space, ticket);
 	sprintf(output, "%d\n", ticket);
 	sendto(sock,output,strlen(output),0
 			,(struct sockaddr *) &client, sizeof(client));
