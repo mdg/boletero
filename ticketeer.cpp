@@ -16,8 +16,8 @@ using namespace std;
 
 enum side_t { ODD, EVEN };
 side_t ODD_OR_EVEN = ODD;
-typedef std::pair< int, fstream * > id_file;
-typedef std::map< std::string, id_file > space_map;
+typedef std::pair< int, fstream * > ticket_file;
+typedef std::map< std::string, ticket_file > space_map;
 typedef space_map::iterator space_iterator;
 
 space_map SPACE;
@@ -40,7 +40,7 @@ space_map SPACE;
 #define ODD_OR_EVEN_NAME (ODD_OR_EVEN == ODD ? "odd" : "even")
 #endif
 
-inline bool correct(int id) { return id % 2 == MOD2; }
+inline bool correct(int ticket) { return ticket % 2 == MOD2; }
 
 
 int open_spaces(const list< string > &spacenames)
@@ -48,19 +48,19 @@ int open_spaces(const list< string > &spacenames)
 	list< string >::const_iterator it = spacenames.begin();
 	for (; it != spacenames.end(); ++it) {
 		fstream *f = new fstream();
-		string filename = "id/"+ *it +".";
+		string filename = "tickets/"+ *it +".";
 		filename += ODD_OR_EVEN_NAME;
 		f->open(filename.c_str());
-		int id = 0;
-		*f >> id;
-		if (! correct(id)) {
+		int ticket = 0;
+		*f >> ticket;
+		if (! correct(ticket)) {
 			cerr << "initial ticket is not "
 				<< ODD_OR_EVEN_NAME << ": " << *it
-				<< "/" << id << endl;
+				<< "/" << ticket << endl;
 			exit(-1);
 		}
-		cout << "id = " << id << endl;
-		SPACE[*it] = id_file(id,f);
+		cout << "ticket = " << ticket << endl;
+		SPACE[*it] = ticket_file(ticket,f);
 	}
 }
 
@@ -71,7 +71,7 @@ int server_iteration(int sock)
 	char space[80];
 	char output[128];
 	int n;
-	int id = 0;
+	int ticket = 0;
 	space_iterator it;
 
 	addr_len = sizeof(client);
@@ -82,14 +82,14 @@ int server_iteration(int sock)
 	space[strlen(space) - 1] = '\0';
 	it = SPACE.find(space);
 	if (it == SPACE.end()) {
-		id = -1;
+		ticket = -1;
 	} else {
-		id = it->second.first = it->second.first + 2;
+		ticket = it->second.first = it->second.first + 2;
 		fstream &f(*it->second.second);
 		f.seekp(0);
-		f << id << endl;
+		f << ticket << endl;
 	}
-	sprintf(output, "%s: %d\n", space, id);
+	sprintf(output, "%s: %d\n", space, ticket);
 	sendto(sock,output,strlen(output),0
 			,(struct sockaddr *) &client, sizeof(client));
 	return 0;
