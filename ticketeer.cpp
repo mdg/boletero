@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <strings.h>
 #include <sys/types.h>
@@ -39,6 +40,9 @@ space_map SPACE;
 #define ODD_OR_EVEN_NAME (ODD_OR_EVEN == ODD ? "odd" : "even")
 #endif
 
+inline bool correct(int id) { return id % 2 == MOD2; }
+
+
 int open_spaces(const list< string > &spacenames)
 {
 	list< string >::const_iterator it = spacenames.begin();
@@ -49,6 +53,12 @@ int open_spaces(const list< string > &spacenames)
 		f->open(filename.c_str());
 		int id = 0;
 		*f >> id;
+		if (! correct(id)) {
+			cerr << "initial ticket is not "
+				<< ODD_OR_EVEN_NAME << ": " << *it
+				<< "/" << id << endl;
+			exit(-1);
+		}
 		cout << "id = " << id << endl;
 		SPACE[*it] = id_file(id,f);
 	}
