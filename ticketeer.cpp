@@ -27,27 +27,59 @@ space_map SPACE;
 #define CHOOSE(odd,even) (ODD_OR_EVEN == ODD ? odd : even)
 #define MOD2 CHOOSE(1,0)
 #define ODD_OR_EVEN_NAME CHOOSE("odd","even")
+#define INITIAL_TICKET CHOOSE(1,2)
 
 inline bool correct(int ticket) { return ticket % 2 == MOD2; }
 
+
+int load_spacenames(list< string > &spacenames)
+{
+	ifstream f;
+	f.open("data/spacenames");
+	if (! f) {
+		cerr << "Could not open spacenames in data/\n";
+	}
+
+	string space;
+	f >> space;
+	while (! f.eof()) {
+		spacenames.push_back(space);
+		f >> space;
+	}
+	return 0;
+}
 
 int open_spaces(const list< string > &spacenames)
 {
 	list< string >::const_iterator it = spacenames.begin();
 	for (; it != spacenames.end(); ++it) {
-		fstream *f = new fstream();
-		string filename = "data/"+ *it +".";
-		filename += ODD_OR_EVEN_NAME;
-		f->open(filename.c_str());
+		string filename = "data/"+ *it +"."+ ODD_OR_EVEN_NAME;
+		ifstream in(filename.c_str());
 		int ticket = 0;
-		*f >> ticket;
+		if (! in) {
+			ticket = 0;
+		} else {
+			in >> ticket;
+		}
+		in.close();
+		if (ticket == 0) {
+			ticket = INITIAL_TICKET;
+		}
 		if (! correct(ticket)) {
 			cerr << "initial ticket is not "
 				<< ODD_OR_EVEN_NAME << ": " << *it
 				<< "/" << ticket << endl;
 			exit(-1);
 		}
-		cout << "ticket = " << ticket << endl;
+
+		fstream *f = new fstream(filename.c_str()
+				, ios_base::ate | ios_base::out);
+		if (f->fail()) {
+			cerr << "Failed to open ticket file: "
+				<< filename << endl;
+			exit(-1);
+		}
+		cout << "space " << *it << " = " << ticket << endl;
 		SPACE[*it] = ticket_file(ticket,f);
 	}
 }
@@ -72,10 +104,11 @@ int server_iteration(int sock)
 	if (it == SPACE.end()) {
 		ticket = -1;
 	} else {
-		ticket = it->second.first = it->second.first + 2;
+		ticket = it->second.first;
+		it->second.first += 2;
 		fstream &f(*it->second.second);
 		f.seekp(0);
-		f << ticket << endl;
+		f << it->second.first << endl;
 	}
 	sprintf(output, "%s: %d\n", space, ticket);
 	sendto(sock,output,strlen(output),0
@@ -110,7 +143,7 @@ int main(int argc, const char **argv)
 	}
 
 	list< string > spacenames;
-	spacenames.push_back("dog");
+	load_spacenames(spacenames);
 	open_spaces(spacenames);
 
 	sock = socket(AF_INET,SOCK_DGRAM,0);
