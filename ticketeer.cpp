@@ -23,22 +23,10 @@ typedef space_map::iterator space_iterator;
 space_map SPACE;
 
 
-#ifdef MAKE_ODD
-#define ID(odd,even) odd
-#define NUM_ARGS 1
-#define MOD2 1
-#define ODD_OR_EVEN_NAME "odd"
-#elif defined MAKE_EVEN
-#define ID(odd,even) even
-#define NUM_ARGS 1
-#define MOD2 0
-#define ODD_OR_EVEN_NAME "even"
-#else
-#define ID(odd,even) (ODD_OR_EVEN == ODD ? odd : even)
 #define NUM_ARGS 2
-#define MOD2 (ODD_OR_EVEN == ODD ? 1 : 0)
-#define ODD_OR_EVEN_NAME (ODD_OR_EVEN == ODD ? "odd" : "even")
-#endif
+#define CHOOSE(odd,even) (ODD_OR_EVEN == ODD ? odd : even)
+#define MOD2 CHOOSE(1,0)
+#define ODD_OR_EVEN_NAME CHOOSE("odd","even")
 
 inline bool correct(int ticket) { return ticket % 2 == MOD2; }
 
@@ -48,7 +36,7 @@ int open_spaces(const list< string > &spacenames)
 	list< string >::const_iterator it = spacenames.begin();
 	for (; it != spacenames.end(); ++it) {
 		fstream *f = new fstream();
-		string filename = "tickets/"+ *it +".";
+		string filename = "data/"+ *it +".";
 		filename += ODD_OR_EVEN_NAME;
 		f->open(filename.c_str());
 		int ticket = 0;
@@ -110,7 +98,6 @@ int main(int argc, const char **argv)
 	}
 
 
-#ifdef DYNAMIC_ODD_OR_EVEN
 	// check value of odd or even argument
 	std::string odd_or_even(argv[1]);
 	if (odd_or_even == "odd") {
@@ -121,7 +108,6 @@ int main(int argc, const char **argv)
 		std::cerr << "Argument should be odd or even\n";
 		return -1;
 	}
-#endif
 
 	list< string > spacenames;
 	spacenames.push_back("dog");
