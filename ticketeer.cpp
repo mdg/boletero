@@ -1,9 +1,9 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <fcntl.h>
 #include <netinet/in.h>
 #include <map>
 #include <string>
@@ -16,7 +16,7 @@ using namespace std;
 
 enum side_t { ODD, EVEN };
 side_t ODD_OR_EVEN = ODD;
-typedef std::pair< int, fstream * > ticket_file;
+typedef std::pair< int, int > ticket_file;
 typedef std::map< std::string, ticket_file > space_map;
 typedef space_map::iterator space_iterator;
 
@@ -72,9 +72,8 @@ int open_spaces(const list< string > &spacenames)
 			exit(-1);
 		}
 
-		fstream *f = new fstream(filename.c_str()
-				, ios_base::ate | ios_base::out);
-		if (f->fail()) {
+		int f = open(filename.c_str(), O_WRONLY|O_CREAT, 0644);
+		if (f < 0) {
 			cerr << "Failed to open ticket file: "
 				<< filename << endl;
 			exit(-1);
@@ -106,9 +105,11 @@ int server_iteration(int sock)
 	} else {
 		ticket = it->second.first;
 		it->second.first += 2;
-		fstream &f(*it->second.second);
-		f.seekp(0);
-		f << it->second.first << endl;
+		char output[64];
+		int f = it->second.second;
+		lseek(f, 0, SEEK_SET);
+		sprintf(output, "%d\n", it->second.first);
+		write(f, output, strlen(output));
 	}
 	sprintf(output, "%s: %d\n", space, ticket);
 	sendto(sock,output,strlen(output),0
