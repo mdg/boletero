@@ -97,7 +97,6 @@ int server_iteration(int sock)
 	bzero(space,sizeof(space));
 	n = recvfrom(sock,space,60,0
 			,(struct sockaddr *) &client, &addr_len);
-	printf("ticket space: %s", space);
 	space[strlen(space) - 1] = '\0';
 	it = SPACE.find(space);
 	if (it == SPACE.end()) {
@@ -111,7 +110,8 @@ int server_iteration(int sock)
 		sprintf(output, "%d\n", it->second.first);
 		write(f, output, strlen(output));
 	}
-	sprintf(output, "%s: %d\n", space, ticket);
+	printf("ticket space: %s -> %d\n", space, ticket);
+	sprintf(output, "%d\n", ticket);
 	sendto(sock,output,strlen(output),0
 			,(struct sockaddr *) &client, sizeof(client));
 	return 0;
