@@ -1,7 +1,7 @@
 import socket
 
 
-class TicketeerClient(object):
+class Client(object):
     def __init__(self, ip = None):
         if ip is None:
             ip = "127.0.0.1"

@@ -1,4 +1,4 @@
 
-ticketeer: ticketeer.cpp
-	g++ -o ticketeer ticketeer.cpp
+boletero: boletero.cpp
+	g++ -o boletero boletero.cpp
 
